@@ -1,0 +1,116 @@
+plugins {
+    id 'application'
+    id 'java'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+    id 'org.beryx.jlink' version '2.16.4' //The badass jlink plugin
+    id 'net.saliman.properties' version '1.4.6' //gradle-local.properties properties will override gradle.properties
+
+    //adds new task to gradle reporting/generateDependencyGraph which can be found under build/reports
+    id "com.vanniktech.dependency.graph.generator" version "0.5.0"
+}
+
+repositories {
+    mavenCentral()
+}
+
+javafx {
+    modules = [
+            'javafx.controls',
+            'javafx.fxml',
+            'javafx.swing',
+            'javafx.web',
+            'javafx.graphics',
+            'javafx.base',
+            'javafx.media'
+    ]
+}
+
+mainClassName = "$moduleName/com.example.Main"
+
+//Variables
+
+def buildDir = 'build'
+
+//Copy maven dependencies into local directory so that the runtime build can use them.
+task libs(type: Copy) {
+    from configurations.runtimeClasspath
+    into "${buildDir}/libs/"
+}
+
+jar.dependsOn(libs)
+
+repositories {
+    flatDir {
+        dirs 'lib'
+    }
+}
+
+apply plugin: 'idea'
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+}
+
+
+jlink {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+
+    addExtraDependencies("javafx")
+
+    launcher{
+        name = 'Example'
+    }
+
+    mergedModule {
+        additive = true
+        forceMerge "jakarta.xml"
+    }
+
+    run {
+        doFirst {
+            jvmArgs += [
+                    //Needed for vbox, specifically com.sun.xml.ws:rt:2.3.2
+                    '--add-opens', "com.sun.xml.bind/com.sun.xml.bind.v2.model.nav=com.sun.xml.ws"
+            ]
+        }
+    }
+
+}
+
+dependencies {
+    implementation name: 'ui' //Removed sun.font because it is already in java.desktop
+    implementation name: 'vboxjws'
+
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'org.apache.commons:commons-lang3:3.8.1'
+    implementation 'commons-validator:commons-validator:1.6'
+    implementation 'com.vdurmont:semver4j:2.2.0'
+    implementation 'com.fasterxml.uuid:java-uuid-generator:3.1.5'
+    implementation 'org.slf4j:jul-to-slf4j:2.0.0-alpha0'
+    implementation 'org.apache.httpcomponents:httpcore:4.4.11'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.9'
+    implementation 'com.squareup.okhttp3:okhttp:4.2.2'
+    implementation 'io.sentry:sentry:1.7.21'
+    implementation 'junit:junit:4.11'
+    implementation 'commons-codec:commons-codec:1.12'
+    implementation 'org.jetbrains:annotations:16.0.2'
+
+    //YAML requirements
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.9.8'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.8'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+
+    implementation 'org.apache.commons:commons-compress:1.18'
+
+    //error: package javax.servlet does not exist provides javax.servlet.ServletContainerInitializer with io.sentry.servlet.SentryServletContainerInitializer;
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
+
+    //com.google.common.collect.ImmutableMap
+    implementation ('com.google.guava:guava:28.1-jre') {
+        exclude group: 'com.google.code.findbugs'
+    }
+
+    //Vewd (VirtualBox) requirements
+    implementation 'com.sun.xml.ws:rt:2.3.2'
+}
