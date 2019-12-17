@@ -66,16 +66,15 @@ jlink {
         additive = true
         forceMerge "jakarta.xml"
     }
+}
 
-    run {
-        doFirst {
-            jvmArgs += [
-                    //Needed for vbox, specifically com.sun.xml.ws:rt:2.3.2
-                    '--add-opens', "com.sun.xml.bind/com.sun.xml.bind.v2.model.nav=com.sun.xml.ws"
-            ]
-        }
+run {
+    doFirst {
+        jvmArgs += [
+                //Needed for vbox, specifically com.sun.xml.ws:rt:2.3.2
+                '--add-opens', "com.sun.xml.bind/com.sun.xml.bind.v2.model.nav=com.sun.xml.ws"
+        ]
     }
-
 }
 
 dependencies {
