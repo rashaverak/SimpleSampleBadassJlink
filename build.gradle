@@ -68,6 +68,16 @@ jlink {
         excludeRequires 'java.jws'
         excludeProvides servicePattern: 'org.codehaus.stax2.*'
     }
+    
+    jpackage {
+        // jpackageHome = findProperty("jpackage.path")
+        // outputDir = someDir
+        // imageName = someImageName
+        // skipInstaller = false
+        // installerName = someInstallerName
+        installerType = "deb" //exe, msi, dmg, rpm, pkg, deb
+        installerOptions = ['--linux-deb-maintainer', 'hello@x.org', '--linux-app-release', project.appVersion]
+    }    
 }
 
 run {
