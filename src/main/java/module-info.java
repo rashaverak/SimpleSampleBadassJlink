@@ -1,4 +1,5 @@
 module com.example {
+    opens com.example to javafx.graphics;
 
     requires javafx.controls;
     requires javafx.fxml;
